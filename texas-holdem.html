@@ -308,6 +308,40 @@ body {
 }
 #overlay .box h2 { font-size: 28px; margin-bottom: 16px; }
 #overlay .box p  { font-size: 16px; margin-bottom: 24px; color: #aaa; }
+
+/* ---- 移动端适配 ---- */
+@media (max-width: 768px) {
+  #app { padding: 8px; max-width: 100%; }
+  #table { aspect-ratio: 1/1; border-width: 8px; }
+  #player-selector { font-size: 12px; gap: 4px; }
+  #player-selector select { font-size: 12px; padding: 2px 8px; }
+
+  .card { width: 26px; height: 38px; border-radius: 4px; }
+  .card .rank { font-size: 10px; }
+  .card .suit { font-size: 12px; }
+  .card-back { width: 26px; height: 38px; }
+
+  .player-name { font-size: 9px; padding: 1px 5px; }
+  .player-chips { font-size: 9px; }
+  .player-bet { font-size: 9px; }
+  .player-area { gap: 2px; }
+
+  .dealer-badge { width: 14px; height: 14px; font-size: 8px; }
+
+  #pot-display { font-size: 11px; padding: 2px 10px; }
+
+  #action-panel button { padding: 8px 12px; font-size: 13px; border-radius: 6px; }
+  #action-panel { gap: 4px; }
+  #raise-slider { width: 100px; }
+
+  .hint-label { font-size: 10px; min-width: 32px; }
+  .hint-badge { font-size: 10px; padding: 1px 6px; }
+  .hint-reason { font-size: 10px; }
+  .hint-conf { font-size: 9px; min-width: 48px; }
+  #hint-panel { padding: 4px 8px; gap: 2px; }
+
+  #message-log { font-size: 10px; max-height: 60px; }
+}
 </style>
 </head>
 <body>

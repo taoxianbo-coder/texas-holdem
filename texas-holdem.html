@@ -308,108 +308,6 @@ body {
 }
 #overlay .box h2 { font-size: 28px; margin-bottom: 16px; }
 #overlay .box p  { font-size: 16px; margin-bottom: 24px; color: #aaa; }
-
-/* ---- 平板适配 ---- */
-@media (max-width: 900px) {
-  #app { max-width: 100%; padding: 10px; }
-  #table { border-width: 10px; }
-  .card { width: 34px; height: 48px; }
-  .card .rank { font-size: 11px; }
-  .card .suit { font-size: 14px; }
-  .card-back { width: 34px; height: 48px; }
-  #action-panel button { padding: 8px 14px; font-size: 13px; }
-}
-
-/* ---- 手机横屏（一屏适配，无滚动） ---- */
-@media (max-height: 500px) and (orientation: landscape) {
-  body { min-height: 100dvh; align-items: stretch; overflow: hidden; }
-  #app {
-    display: flex; flex-direction: column;
-    padding: 1px 4px; width: 100%; max-width: 100%;
-    height: 100dvh; overflow: hidden;
-  }
-  #player-selector { font-size: 9px; gap: 2px; margin-bottom: 1px; flex-shrink: 0; }
-  #player-selector select { font-size: 9px; padding: 0 3px; }
-
-  #table {
-    flex: 1 1 auto;
-    min-height: 0;
-    width: 100%; max-width: 100%;
-    aspect-ratio: auto;
-    border-width: 5px;
-    margin-bottom: 2px;
-    box-shadow: 0 0 0 2px #3e2723, 0 0 0 4px #8d6e63, 0 0 30px rgba(0,0,0,0.5), inset 0 0 80px rgba(0,0,0,0.3);
-  }
-
-  #controls { flex-shrink: 0; gap: 1px; }
-  #hint-panel { padding: 1px 6px; gap: 0; min-height: auto; border-radius: 4px; }
-  .hint-row { gap: 2px; }
-  .hint-label { font-size: 7px; min-width: 22px; }
-  .hint-badge { font-size: 7px; padding: 0 4px; border-radius: 3px; }
-  .hint-reason { font-size: 7px; }
-  .hint-conf { font-size: 6px; min-width: 32px; }
-
-  #action-panel { gap: 2px; }
-  #action-panel button { padding: 3px 8px; font-size: 10px; border-radius: 4px; }
-  #raise-slider { width: 70px; height: 12px; }
-  #raise-amount { font-size: 9px; }
-
-  #message-log { font-size: 7px; max-height: 24px; padding: 1px 6px; border-radius: 4px; }
-
-  .card { width: 20px; height: 28px; border-radius: 2px; }
-  .card .rank { font-size: 7px; }
-  .card .suit { font-size: 9px; }
-  .card-back { width: 20px; height: 28px; }
-  .cards-row { gap: 1px; }
-
-  .player-name { font-size: 6px; padding: 0 3px; border-radius: 4px; }
-  .player-chips { font-size: 6px; padding: 0 3px; border-radius: 4px; }
-  .player-bet { font-size: 6px; padding: 0 3px; border-radius: 4px; }
-  .player-area { gap: 0px; }
-
-  .dealer-badge { width: 10px; height: 10px; font-size: 5px; }
-
-  #pot-display { font-size: 8px; padding: 0 6px; border-radius: 6px; }
-  #community-area { gap: 1px; }
-
-  #overlay .box { padding: 20px 30px; }
-  #overlay .box h2 { font-size: 18px; margin-bottom: 8px; }
-  #overlay .box p { font-size: 12px; margin-bottom: 12px; }
-}
-
-/* ---- 手机竖屏 ---- */
-@media (max-width: 500px) and (orientation: portrait) {
-  #app { padding: 4px; max-width: 100%; }
-  #table { aspect-ratio: 4/5; border-width: 6px; }
-  #player-selector { font-size: 11px; gap: 3px; }
-  #player-selector select { font-size: 11px; padding: 1px 6px; }
-
-  .card { width: 24px; height: 34px; border-radius: 3px; }
-  .card .rank { font-size: 9px; }
-  .card .suit { font-size: 11px; }
-  .card-back { width: 24px; height: 34px; }
-
-  .player-name { font-size: 8px; padding: 0 5px; }
-  .player-chips { font-size: 8px; }
-  .player-bet { font-size: 8px; }
-  .player-area { gap: 1px; }
-
-  .dealer-badge { width: 12px; height: 12px; font-size: 7px; }
-
-  #pot-display { font-size: 10px; padding: 1px 8px; }
-
-  #action-panel button { padding: 7px 10px; font-size: 12px; }
-  #action-panel { gap: 3px; }
-  #raise-slider { width: 90px; }
-
-  .hint-label { font-size: 9px; min-width: 28px; }
-  .hint-badge { font-size: 9px; padding: 1px 5px; }
-  .hint-reason { font-size: 9px; }
-  .hint-conf { font-size: 8px; min-width: 44px; }
-  #hint-panel { padding: 3px 6px; gap: 1px; min-height: auto; }
-
-  #message-log { font-size: 9px; max-height: 48px; }
-}
 </style>
 </head>
 <body>
@@ -1259,75 +1157,166 @@ class TexasHoldem {
     return { action: 'fold', reason: '没牌没draw，果断弃', confidence: 'high' };
   }
 
-  // ---- AI 决策 ----
+  // ---- AI 决策（模拟真人实战） ----
   getAIAction(player, toCall, canCheck) {
+    const street = this.communityCards.length;
     const strength = this.calcHandStrength(player);
+    const oppCount = this.players.filter(p => !p.folded).length;
+    const isHeadsUp = oppCount === 2;
+    const hasDraw = this.hasDraw(player);
+    const personality = 0.85 + (player.index % 5) * 0.08;
 
-    // 加入随机扰动
-    const adjusted = strength + (Math.random() - 0.5) * 0.2;
-    const potOdds = toCall / (this.pot + toCall + 0.01);
-
-    if (canCheck && adjusted < 0.4) {
-      return { type: 'check' };
+    if (street === 0) {
+      return this.aiPreflop(player, toCall, canCheck, personality);
     }
 
-    if (toCall === 0) {
-      // 无人下注
-      if (adjusted > 0.7) {
-        const raiseAmt = Math.min(
-          Math.floor(this.pot * (0.5 + Math.random() * 0.5)),
-          player.chips
-        );
-        // Need to bet at least BIG_BLIND
-        const bet = Math.max(BIG_BLIND, raiseAmt);
-        if (bet < player.chips) {
-          // It's a bet (not a raise per se, but we treat as raise)
-          return { type: 'raise', amount: bet };
-        } else if (player.chips > 0) {
-          return { type: 'allin' };
+    // ---- 无人下注 ----
+    if (canCheck && toCall === 0) {
+      if (strength > 0.58) {
+        const bet = Math.max(BIG_BLIND, Math.floor(this.pot * (0.5 + strength * 0.4)));
+        return bet < player.chips ? { type: 'raise', amount: bet } : { type: 'check' };
+      }
+      if (hasDraw && strength > 0.25) {
+        if (Math.random() < 0.6) {
+          const bet = Math.max(BIG_BLIND, Math.floor(this.pot * 0.55));
+          return bet < player.chips ? { type: 'raise', amount: bet } : { type: 'check' };
         }
       }
-      if (adjusted > 0.45 && Math.random() > 0.5) {
-        const bet = Math.min(BIG_BLIND * 2, player.chips);
-        return bet < player.chips ? { type: 'raise', amount: bet } : { type: 'allin' };
+      if (isHeadsUp && Math.random() < 0.4 * personality) {
+        const bet = Math.max(BIG_BLIND, Math.floor(this.pot * 0.5));
+        return bet < player.chips ? { type: 'raise', amount: bet } : { type: 'check' };
       }
       return { type: 'check' };
     }
 
-    // 有人下注
-    if (adjusted < 0.25) {
-      // 弱牌，弃牌
-      if (toCall > player.chips * 0.1 || adjusted < 0.15) {
-        return { type: 'fold' };
+    // ---- 面对下注 ----
+    const betToStack = toCall / (player.chips + toCall + 0.01);
+
+    // 强牌（葫芦+）：加注获取价值
+    if (strength > 0.7) {
+      if (Math.random() < 0.75) {
+        const amount = Math.floor(toCall * (2.5 + Math.random() * 2));
+        return amount < player.chips ? { type: 'raise', amount } : { type: 'call' };
       }
-      return { type: 'call' };
+      return toCall < player.chips ? { type: 'call' } : { type: 'raise', amount: player.chips };
     }
 
-    if (adjusted > 0.75) {
-      // 强牌，加注
-      const raiseAmt = Math.min(
-        toCall + Math.floor(this.pot * (0.5 + Math.random())),
-        player.chips
-      );
-      if (raiseAmt > toCall && raiseAmt < player.chips) {
-        return { type: 'raise', amount: raiseAmt + player.currentBet };
+    // 强牌（顺子/同花）：大部分跟，偶尔加注
+    if (strength > 0.5) {
+      if (Math.random() < 0.2 && isHeadsUp) {
+        const amount = Math.floor(toCall * 2.5);
+        return amount < player.chips ? { type: 'raise', amount } : { type: 'call' };
       }
+      if (betToStack < 0.45) return { type: 'call' };
+      if (toCall <= player.chips * 0.4) return { type: 'call' };
+      return Math.random() < 0.5 ? { type: 'call' } : { type: 'fold' };
     }
 
-    if (adjusted > 0.5) {
-      // 中强牌，跟注
-      if (toCall <= player.chips * 0.3) {
-        return { type: 'call' };
+    // 有听牌：追牌到底（模拟真人买牌行为）
+    if (hasDraw) {
+      if (Math.random() < 0.2 && isHeadsUp && street < 5) {
+        const amount = Math.floor(toCall * 2.5);
+        return amount < player.chips ? { type: 'raise', amount } : { type: 'call' };
       }
-      if (Math.random() > 0.6) return { type: 'call' };
+      if (toCall <= player.chips * 0.2) return { type: 'call' };
+      if (betToStack < 0.15 && street < 5) return { type: 'call' };
+      if (toCall <= player.chips * 0.1 && street < 5) return { type: 'call' };
+      if (street === 5 && toCall <= player.chips * 0.05) return { type: 'call' };
+      if (toCall > player.chips * 0.35) return { type: 'fold' };
+      return Math.random() < 0.4 ? { type: 'call' } : { type: 'fold' };
+    }
+
+    // 有任何对子：粘池跟注（不轻易弃牌）
+    if (this.hasAnyPair(player)) {
+      if (toCall <= player.chips * 0.12) return { type: 'call' };
+      if (betToStack < 0.12 && oppCount <= 3) return { type: 'call' };
+      if (street < 5 && toCall <= player.chips * 0.08) return { type: 'call' };
+      if (street < 4 && betToStack < 0.1) return { type: 'call' };
+    }
+
+    // 完全空气：大部分弃，少部分float
+    if (toCall <= player.chips * 0.04 && isHeadsUp && street < 5) {
+      if (Math.random() < 0.2 * personality) return { type: 'call' };
+    }
+
+    // 偶尔反偷鸡
+    if (isHeadsUp && Math.random() < 0.1 * personality && toCall < player.chips * 0.35) {
+      const amount = Math.floor(toCall * 3);
+      if (amount < player.chips) return { type: 'raise', amount };
+    }
+
+    return { type: 'fold' };
+  }
+
+  aiPreflop(player, toCall, canCheck, personality) {
+    const [c1, c2] = player.holeCards;
+    if (!c1 || !c2) return { type: 'fold' };
+    const high = Math.max(c1.rankValue, c2.rankValue);
+    const low = Math.min(c1.rankValue, c2.rankValue);
+    const suited = c1.suit === c2.suit;
+    const paired = c1.rankValue === c2.rankValue;
+    const gap = high - low;
+    const posName = this.getPositionName(player);
+    const isBlind = posName === 'BB' || posName === 'SB';
+    const isLate = posName === 'BTN' || posName === 'CO';
+
+    if (canCheck && toCall === 0) {
+      if (paired && high >= 6) return this.aiRaise(player, BIG_BLIND * 3);
+      if (high >= 13) return this.aiRaise(player, BIG_BLIND * 3);
+      if (high === 12 && low >= 10) return this.aiRaise(player, BIG_BLIND * 3);
+      if (suited && high >= 10) return this.aiRaise(player, BIG_BLIND * 2.5);
+      if (suited && gap <= 1 && high >= 7) return this.aiRaise(player, BIG_BLIND * 2.5);
+      if (isLate && high >= 9) return this.aiRaise(player, BIG_BLIND * 2.5);
+      if (isLate && suited && high >= 7) return this.aiRaise(player, BIG_BLIND * 2.5);
+      if (isLate && gap <= 2 && high >= 6) return this.aiRaise(player, BIG_BLIND * 2);
+      if (isBlind) return { type: 'check' };
       return { type: 'fold' };
     }
 
-    // 边缘牌，小注跟，大注弃
-    if (toCall <= player.chips * 0.1) {
-      return { type: 'call' };
+    if (!canCheck && toCall > 0) {
+      const betToStack = toCall / (player.chips + toCall + 0.01);
+
+      if (paired && high >= 12) return this.aiRaise(player, Math.floor(toCall * 3));
+      if (high === 14 && (paired || low >= 12)) return this.aiRaise(player, Math.floor(toCall * 3));
+      if (high === 14 && low >= 10 && suited) return this.aiRaise(player, Math.floor(toCall * 2.5));
+      if (paired && high >= 8 && Math.random() < 0.6) return this.aiRaise(player, Math.floor(toCall * 2.8));
+
+      if (paired) return { type: 'call' };
+      if (high >= 13) return { type: 'call' };
+      if (high === 12 && low >= 10) return { type: 'call' };
+      if (suited && high >= 10) return { type: 'call' };
+      if (suited && gap <= 2 && high >= 6) return { type: 'call' };
+      if (gap <= 1 && high >= 8) return { type: 'call' };
+      if (isBlind && (high >= 11 || suited)) return { type: 'call' };
+      if (isBlind && betToStack < 0.18) return { type: 'call' };
+      if (isLate && (high >= 10 || suited)) return { type: 'call' };
+      if (betToStack < 0.08) return { type: 'call' };
+
+      return { type: 'fold' };
     }
-    return { type: 'fold' };
+
+    if (paired && high >= 9) return this.aiRaise(player, BIG_BLIND * 3);
+    if (high >= 13) return this.aiRaise(player, BIG_BLIND * 3);
+    return { type: 'check' };
+  }
+
+  aiRaise(player, amount) {
+    const actual = Math.max(BIG_BLIND, Math.min(amount, player.chips));
+    if (actual < player.chips) return { type: 'raise', amount: actual };
+    return { type: 'raise', amount: player.chips };
+  }
+
+  hasAnyPair(player) {
+    if (this.communityCards.length === 0) {
+      return player.holeCards.length >= 2 && player.holeCards[0].rankValue === player.holeCards[1].rankValue;
+    }
+    const allRanks = [...player.holeCards, ...this.communityCards].map(c => c.rankValue);
+    const counts = {};
+    for (const r of allRanks) {
+      counts[r] = (counts[r] || 0) + 1;
+      if (counts[r] >= 2) return true;
+    }
+    return false;
   }
 
   calcHandStrength(player) {
